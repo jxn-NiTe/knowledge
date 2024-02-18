@@ -1,4 +1,6 @@
-```
+# App Flow via Sequence Diagrams
+
+```text
 ---
 title: User Sign Up Flow
 ---

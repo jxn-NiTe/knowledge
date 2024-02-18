@@ -1,4 +1,6 @@
-```
+# DB Schemas via Entity Relationship Diagrams
+
+```txt
 ---
 title: Streamy Entity Relationship Diagram
 ---

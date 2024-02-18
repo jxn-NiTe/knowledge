@@ -1,4 +1,6 @@
-```
+# DDD via Class Diagrams
+
+```txt
 ---
 title: Streamy Domain Model
 ---
@@ -40,6 +42,6 @@ classDiagram
 
     Season "1" *-- "0..*" Review: has
     Season "1" *-- "1..*" Episode: has
-    
+
     Episode "1" *-- "0..*" Review: has
 ```

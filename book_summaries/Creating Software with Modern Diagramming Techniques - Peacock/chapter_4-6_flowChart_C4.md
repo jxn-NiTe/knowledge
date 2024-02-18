@@ -1,6 +1,8 @@
+# C4 Model via Flow Charts
+
 ## System Context Diagram
 
-```
+```text
 ---
 title: "Listing Service C4 Model: System Context"
 ---
@@ -102,7 +104,7 @@ flowchart TD
 
 ## Container Diagram
 
-```
+```text
 ---
 title: "Listing Service C4 Model: Container Diagram"
 ---
@@ -268,7 +270,7 @@ flowchart TD
 
 ## Component Diagram
 
-```
+```text
 ---
 title: "Listing Service C4 Model: Component Diagram"
 ---
