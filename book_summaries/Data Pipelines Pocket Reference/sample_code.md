@@ -654,3 +654,428 @@ cur = snow_conn.cursor()
 cur.execute(sql)
 cur.close()
 ```
+
+## Transformation Code
+
+### parsing URLs
+
+```python
+from urllib.parse import urlsplit, parse_qs
+import csv
+
+url = """https://www.mydomain.com/page-name?utm_content=textlink&utm_medium=social&utm_source=twitter&utm_campaign=fallsale"""
+
+split_url = urlsplit(url)
+params = parse_qs(split_url.query)
+parsed_url = []
+all_urls = []
+
+# domain
+parsed_url.append(split_url.netloc)
+
+# url path
+parsed_url.append(split_url.path)
+
+parsed_url.append(params['utm_content'][0])
+parsed_url.append(params['utm_medium'][0])
+parsed_url.append(params['utm_source'][0])
+parsed_url.append(params['utm_campaign'][0])
+
+all_urls.append(parsed_url)
+
+export_file = "export_file.csv"
+
+with open(export_file, 'w') as fp:
+    csvw = csv.writer(fp, delimiter='|')
+    csvw.writerows(all_urls)
+
+fp.close()
+```
+
+## Orchestration Code
+
+### Simple DAG
+
+```python
+from datetime import timedelta
+from airflow import DAG
+from airflow.operators.bash_operator \
+    import BashOperator
+from airflow.utils.dates import days_ago
+
+dag = DAG(
+    'simple_dag',
+    description='A simple DAG',
+    schedule_interval=timedelta(days=1),
+    start_date = days_ago(1),
+)
+
+t1 = BashOperator(
+    task_id='print_date',
+    bash_command='date',
+    dag=dag,
+)
+
+t2 = BashOperator(
+    task_id='sleep',
+    depends_on_past=True,
+    bash_command='sleep 3',
+    dag=dag,
+)
+
+t3 = BashOperator(
+    task_id='print_end',
+    start_date = days_ago(1),
+    depends_on_past=True,
+    bash_command='echo \'end\'',
+    dag=dag,
+)
+
+t1 >> t2
+t2 >> t3
+```
+
+### ELT DAG
+
+```python
+from datetime import timedelta
+from airflow import DAG
+from airflow.operators.bash_operator import BashOperator
+from airflow.operators.postgres_operator import PostgresOperator
+from airflow.utils.dates import days_ago
+
+dag = DAG(
+    'elt_pipeline_sample',
+    description='A sample ELT pipeline',
+    schedule_interval=timedelta(days=1),
+    start_date = days_ago(1),
+)
+
+extract_orders_task = BashOperator(
+    task_id='extract_order_data',
+    bash_command='set -e; python /Users/jamesdensmore/airflow/dags/scripts/extract_orders.py',
+    dag=dag,
+)
+
+extract_customers_task = BashOperator(
+    task_id='extract_customer_data',
+    bash_command='set -e; python /Users/jamesdensmore/airflow/dags/scripts/extract_customers.py',
+    dag=dag,
+)
+
+load_orders_task = BashOperator(
+    task_id='load_order_data',
+    bash_command='python /Users/jamesdensmore/airflow/dags/scripts/load_orders.py',
+    dag=dag,
+)
+
+load_customers_task = BashOperator(
+    task_id='load_customer_data',
+    bash_command='python /Users/jamesdensmore/airflow/dags/scripts/load_customers.py',
+    dag=dag,
+)
+
+check_order_rowcount_task = BashOperator(
+    task_id='check_order_rowcount',
+    bash_command='set -e; python validator.py order_count.sql order_full_count.sql equals',
+    dag=dag,
+)
+
+revenue_model_task = PostgresOperator(
+    task_id='build_data_model',
+    postgres_conn_id='redshift_dw',
+    sql='sql/order_revenue_model.sql',
+    dag=dag,
+)
+
+extract_orders_task >> load_orders_task
+extract_customers_task >> load_customers_task
+load_orders_task >> check_order_rowcount_task
+check_order_rowcount_task >> revenue_model_task
+load_customers_task >> revenue_model_task
+```
+
+### DAG dependencies and Sensors
+
+```python
+from datetime import datetime
+from airflow import DAG
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.sensors.external_task_sensor import ExternalTaskSensor
+from datetime import timedelta
+from airflow.utils.dates import days_ago
+
+dag = DAG(
+        'sensor_test',
+        description='DAG with a sensor',
+        schedule_interval=timedelta(days=1),
+        start_date = days_ago(1))
+
+sensor = ExternalTaskSensor(
+            task_id='dag_sensor',
+            external_dag_id = 'elt_pipeline_sample',
+            external_task_id = None,
+            dag=dag,
+            mode = 'reschedule')
+
+task1 = DummyOperator(
+            task_id='dummy_task',
+            retries=1,
+            dag=dag)
+
+sensor >> task1
+```
+
+## Validation Code
+
+### validation framework
+
+```python
+import sys
+import psycopg2
+import configparser
+
+def connect_to_warehouse():
+    # get db connection parameters from the conf file
+    parser = configparser.ConfigParser()
+    parser.read("pipeline.conf")
+    dbname = parser.get("aws_creds", "database")
+    user = parser.get("aws_creds", "username")
+    password = parser.get("aws_creds", "password")
+    host = parser.get("aws_creds", "host")
+    port = parser.get("aws_creds", "port")
+
+    # connect to the Redshift cluster
+    rs_conn = psycopg2.connect(
+        "dbname=" + dbname
+        + " user=" + user
+        + " password=" + password
+        + " host=" + host
+        + " port=" + port)
+
+    return rs_conn
+
+# execute a test made of up two scripts
+# and a comparison operator
+# Returns true/false for test pass/fail
+def execute_test(
+        db_conn,
+        script_1,
+        script_2,
+        comp_operator):
+
+    # execute the 1st script and store the result
+    cursor = db_conn.cursor()
+    sql_file = open(script_1, 'r')
+    cursor.execute(sql_file.read())
+
+    record = cursor.fetchone()
+    result_1 = record[0]
+    db_conn.commit()
+    cursor.close()
+
+    # execute the 2nd script and store the result
+    cursor = db_conn.cursor()
+    sql_file = open(script_2, 'r')
+    cursor.execute(sql_file.read())
+
+    record = cursor.fetchone()
+    result_2 = record[0]
+    db_conn.commit()
+    cursor.close()
+
+    print("result 1 = " + str(result_1))
+    print("result 2 = " + str(result_2))
+
+    # compare values based on the comp_operator
+    if comp_operator == "equals":
+        return result_1 == result_2
+    elif comp_operator == "greater_equals":
+        return result_1 >= result_2
+    elif comp_operator == "greater":
+        return result_1 > result_2
+    elif comp_operator == "less_equals":
+        return result_1 <= result_2
+    elif comp_operator == "less":
+        return result_1 < result_2
+    elif comp_operator == "not_equal":
+        return result_1 != result_2
+
+    # if we made it here, something went wrong
+    return False
+
+if __name__ == "__main__":
+
+    if len(sys.argv) == 2 and sys.argv[1] == "-h":
+        print("Usage: python validator.py"
+            + "script1.sql script2.sql "
+            + "comparison_operator")
+        print("Valid comparison_operator values:")
+        print("equals")
+        print("greater_equals")
+        print("greater")
+        print("less_equals")
+        print("less")
+        print("not_equal")
+
+        exit(0)
+
+    if len(sys.argv) != 4:
+        print("Usage: python validator.py"
+            + "script1.sql script2.sql "
+            + "comparison_operator")
+        exit(-1)
+
+    script_1 = sys.argv[1]
+    script_2 = sys.argv[2]
+    comp_operator = sys.argv[3]
+
+    # connect to the data warehouse
+    db_conn = connect_to_warehouse()
+
+    # execute the validation test
+    test_result = execute_test(
+                    db_conn,
+                    script_1,
+                    script_2,
+                    comp_operator)
+
+
+    print("Result of test: " + str(test_result))
+
+    if test_result == True:
+        exit(0)
+    else:
+        exit(-1)
+```
+
+### validation with sending slack messages
+
+```python
+import sys
+import psycopg2
+import configparser
+
+def connect_to_warehouse():
+    # get db connection parameters from the conf file
+    parser = configparser.ConfigParser()
+    parser.read("pipeline.conf")
+    dbname = parser.get("aws_creds", "database")
+    user = parser.get("aws_creds", "username")
+    password = parser.get("aws_creds", "password")
+    host = parser.get("aws_creds", "host")
+    port = parser.get("aws_creds", "port")
+
+    # connect to the Redshift cluster
+    rs_conn = psycopg2.connect("dbname=" + dbname + " user=" + user + " password=" + password + " host=" + host + " port=" + port)
+
+    return rs_conn
+
+# execute a test made of up two scripts and a comparison operator
+# Returns true/false for test pass/fail
+def execute_test(db_conn, script_1, script_2, comp_operator):
+
+    # execute the 1st script and store the result
+    cursor = db_conn.cursor()
+    sql_file = open(script_1, 'r')
+    cursor.execute(sql_file.read())
+
+    record = cursor.fetchone()
+    result_1 = record[0]
+    db_conn.commit()
+    cursor.close()
+
+    # execute the 2nd script and store the result
+    cursor = db_conn.cursor()
+    sql_file = open(script_2, 'r')
+    cursor.execute(sql_file.read())
+
+    record = cursor.fetchone()
+    result_2 = record[0]
+    db_conn.commit()
+    cursor.close()
+
+    print("result 1 = " + str(result_1))
+    print("result 2 = " + str(result_2))
+
+    # compare values based on the comp_operator
+    if comp_operator == "equals":
+        return result_1 == result_2
+    elif comp_operator == "greater_equals":
+        return result_1 >= result_2
+    elif comp_operator == "greater":
+        return result_1 > result_2
+    elif comp_operator == "less_equals":
+        return result_1 <= result_2
+    elif comp_operator == "less":
+        return result_1 < result_2
+    elif comp_operator == "not_equal":
+        return result_1 != result_2
+
+    # if we made it here, something went wrong
+    return False
+
+# test_result should be True/False
+def send_slack_notification(webhook_url, script_1, script_2, comp_operator, test_result):
+    try:
+        if test_result == True:
+            message = "Validation Test Passed!: " + script_1 + " / " + script_2 + " / " + comp_operator
+        else:
+            message = "Validation Test FAILED!: " + script_1 + " / " + script_2 + " / " + comp_operator
+
+        slack_data = {'text': message}
+        response = requests.post(webhook_url,
+            data=json.dumps(slack_data),
+            headers={
+                'Content-Type': 'application/json'
+            })
+
+        if response.status_code != 200:
+            print(response)
+            return False
+    except Exception as e:
+        print("error sending slack notification")
+        print(str(e))
+        return False
+
+if __name__ == "__main__":
+
+    if len(sys.argv) == 2 and sys.argv[1] == "-h":
+        print("Usage: python validator.py script1.sql script2.sql comparison_operator")
+        print("Valid comparison_operator values:")
+        print("equals")
+        print("greater_equals")
+        print("greater")
+        print("less_equals")
+        print("less")
+        print("not_equal")
+
+        exit(0)
+
+    if len(sys.argv) != 5:
+        print("Usage: python validator.py script1.sql script2.sql comparison_operator severity_level")
+        exit(-1)
+
+    script_1 = sys.argv[1]
+    script_2 = sys.argv[2]
+    comp_operator = sys.argv[3]
+    sev_level = sys.argv[4]
+
+    # connect to the data warehouse
+    db_conn = connect_to_warehouse()
+
+    # execute the validation test
+    test_result = execute_test(db_conn, script_1, script_2, comp_operator)
+
+
+    print("Result of test: " + str(test_result))
+
+    if test_result == True:
+        exit(0)
+    else:
+        #send_slack_notification(webhook_url, script_1, script_2, comp_operator, test_result)
+        if sev_level == "halt":
+            exit(-1)
+        else:
+            exit(0)
+```
