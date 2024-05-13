@@ -1079,3 +1079,318 @@ if __name__ == "__main__":
         else:
             exit(0)
 ```
+
+## Metrics Related Code
+
+### extract from Airflow
+
+```python
+import csv
+import boto3
+import configparser
+import psycopg2
+
+# get db Redshift connection info
+parser = configparser.ConfigParser()
+parser.read("pipeline.conf")
+dbname = parser.get("aws_creds", "database")
+user = parser.get("aws_creds", "username")
+password = parser.get("aws_creds", "password")
+host = parser.get("aws_creds", "host")
+port = parser.get("aws_creds", "port")
+
+# connect to the redshift cluster
+rs_conn = psycopg2.connect(
+            "dbname=" + dbname
+            + " user=" + user
+            + " password=" + password
+            + " host=" + host
+            + " port=" + port)
+
+rs_sql = """SELECT COALESCE(MAX(id),-1)
+            FROM dag_run_history;"""
+rs_cursor = rs_conn.cursor()
+rs_cursor.execute(rs_sql)
+result = rs_cursor.fetchone()
+
+# there's only one row and column returned
+last_id = result[0]
+rs_cursor.close()
+rs_conn.commit()
+
+# connect to the airflow db
+parser = configparser.ConfigParser()
+parser.read("pipeline.conf")
+dbname = parser.get("airflowdb_config", "database")
+user = parser.get("airflowdb_config", "username")
+password = parser.get("airflowdb_config", "password")
+host = parser.get("airflowdb_config", "host")
+port =  parser.get("airflowdb_config", "port")
+conn = psycopg2.connect(
+        "dbname=" + dbname
+        + " user=" + user
+        + " password=" + password
+        + " host=" + host
+        + " port=" + port)
+
+# get any new DAG runs. ignore running DAGs
+m_query = """SELECT
+                id,
+                dag_id,
+                execution_date,
+                state,
+                run_id,
+                external_trigger,
+                end_date,
+                start_date
+            FROM dag_run
+            WHERE id > %s
+            AND state <> \'running\';
+            """
+
+m_cursor = conn.cursor()
+m_cursor.execute(m_query, (last_id,))
+results = m_cursor.fetchall()
+
+local_filename = "dag_run_extract.csv"
+with open(local_filename, 'w') as fp:
+    csv_w = csv.writer(fp, delimiter='|')
+    csv_w.writerows(results)
+
+fp.close()
+m_cursor.close()
+conn.close()
+
+# load the aws_boto_credentials values
+parser = configparser.ConfigParser()
+parser.read("pipeline.conf")
+access_key = parser.get("aws_boto_credentials",
+                "access_key")
+secret_key = parser.get("aws_boto_credentials",
+                "secret_key")
+bucket_name = parser.get("aws_boto_credentials",
+                "bucket_name")
+
+# upload the local CSV to the S3 bucket
+s3 = boto3.client(
+        's3',
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key)
+s3_file = local_filename
+s3.upload_file(local_filename, bucket_name, s3_file)
+```
+
+### load Airflow extract to DWH
+
+```python
+import boto3
+import configparser
+import pyscopg2
+
+# get db Redshift connection info
+parser = configparser.ConfigParser()
+parser.read("pipeline.conf")
+dbname = parser.get("aws_creds", "database")
+user = parser.get("aws_creds", "username")
+password = parser.get("aws_creds", "password")
+host = parser.get("aws_creds", "host")
+port = parser.get("aws_creds", "port")
+
+# connect to the redshift cluster
+rs_conn = psycopg2.connect(
+            "dbname=" + dbname
+            + " user=" + user
+            + " password=" + password
+            + " host=" + host
+            + " port=" + port)
+
+# load the account_id and iam_role from the conf files
+parser = configparser.ConfigParser()
+parser.read("pipeline.conf")
+account_id = parser.get(
+                "aws_boto_credentials",
+                "account_id")
+iam_role = parser.get("aws_creds", "iam_role")
+
+# run the COPY command to ingest into Redshift
+file_path = "s3://bucket-name/dag_run_extract.csv"
+
+sql = """COPY dag_run_history
+        (id,dag_id,execution_date,
+        state,run_id,external_trigger,
+        end_date,start_date)"""
+sql = sql + " from %s "
+sql = sql + " iam_role 'arn:aws:iam::%s:role/%s';"
+
+# create a cursor object and execute the COPY command
+cur = rs_conn.cursor()
+cur.execute(sql,(file_path, account_id, iam_role))
+
+# close the cursor and commit the transaction
+cur.close()
+rs_conn.commit()
+
+# close the connection
+rs_conn.close()
+```
+
+### add logging to validator framework
+
+```python
+import sys
+import psycopg2
+import configparser
+
+def connect_to_warehouse():
+    # get db connection parameters from the conf file
+    parser = configparser.ConfigParser()
+    parser.read("pipeline.conf")
+    dbname = parser.get("aws_creds", "database")
+    user = parser.get("aws_creds", "username")
+    password = parser.get("aws_creds", "password")
+    host = parser.get("aws_creds", "host")
+    port = parser.get("aws_creds", "port")
+
+    # connect to the Redshift cluster
+    rs_conn = psycopg2.connect(
+                "dbname=" + dbname
+                + " user=" + user
+                + " password=" + password
+                + " host=" + host
+                + " port=" + port)
+
+    return rs_conn
+
+# execute a test made of up two scripts
+# and a comparison operator
+# Returns true/false for test pass/fail
+def execute_test(
+        db_conn,
+        script_1,
+        script_2,
+        comp_operator):
+
+    # execute the 1st script and store the result
+    cursor = db_conn.cursor()
+    sql_file = open(script_1, 'r')
+    cursor.execute(sql_file.read())
+
+    record = cursor.fetchone()
+    result_1 = record[0]
+    db_conn.commit()
+    cursor.close()
+
+    # execute the 2nd script and store the result
+    cursor = db_conn.cursor()
+    sql_file = open(script_2, 'r')
+    cursor.execute(sql_file.read())
+
+    record = cursor.fetchone()
+    result_2 = record[0]
+    db_conn.commit()
+    cursor.close()
+
+    print("result 1 = " + str(result_1))
+    print("result 2 = " + str(result_2))
+
+    # compare values based on the comp_operator
+    if comp_operator == "equals":
+        return result_1 == result_2
+    elif comp_operator == "greater_equals":
+        return result_1 >= result_2
+    elif comp_operator == "greater":
+        return result_1 > result_2
+    elif comp_operator == "less_equals":
+        return result_1 <= result_2
+    elif comp_operator == "less":
+        return result_1 < result_2
+    elif comp_operator == "not_equal":
+        return result_1 != result_2
+
+    # if we made it here, something went wrong
+    return False
+
+def log_result(
+        db_conn,
+        script_1,
+        script_2,
+        comp_operator,
+        result):
+    m_query = """INSERT INTO validation_run_history(
+                    script_1,
+                    script_2,
+                    comp_operator,
+                    test_result,
+                    test_run_at)
+                VALUES(%s, %s, %s, %s,
+                    current_timestamp);"""
+
+    m_cursor = db_conn.cursor()
+    m_cursor.execute(
+                m_query,
+                (script_1,
+                    script_2,
+                    comp_operator,
+                    result)
+            )
+    db_conn.commit()
+
+    m_cursor.close()
+    db_conn.close()
+
+    return
+
+if __name__ == "__main__":
+    if len(sys.argv) == 2 and sys.argv[1] == "-h":
+        print("Usage: python validator.py"
+            + "script1.sql script2.sql "
+            + "comparison_operator")
+        print("Valid comparison_operator values:")
+        print("equals")
+        print("greater_equals")
+        print("greater")
+        print("less_equals")
+        print("less")
+        print("not_equal")
+
+        exit(0)
+
+    if len(sys.argv) != 5:
+        print("Usage: python validator.py"
+            + "script1.sql script2.sql "
+            + "comparison_operator")
+        exit(-1)
+
+    script_1 = sys.argv[1]
+    script_2 = sys.argv[2]
+    comp_operator = sys.argv[3]
+    sev_level = sys.argv[4]
+
+    # connect to the data warehouse
+    db_conn = connect_to_warehouse()
+
+    # execute the validation test
+    test_result = execute_test(
+                    db_conn,
+                    script_1,
+                    script_2,
+                    comp_operator)
+
+    # log the test in the data warehouse
+    log_result(
+        db_conn, 
+        script_1,
+        script_2,
+        comp_operator,
+        test_result)
+
+    print("Result of test: " + str(test_result))
+
+    if test_result == True:
+        exit(0)
+    else:
+        if sev_level == "halt":
+            exit(-1)
+        else:
+            exit(0)
+```
