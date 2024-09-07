@@ -1,6 +1,6 @@
 # The Five Thieves Of Time
 
-* time is preachious, and not renewable
+* time is preacious, and not renewable
 * need to protect against the five time thieves encountered in IT/tech workplaces
 
 1. too much work-in-progress (WIP): work started, but not finished
