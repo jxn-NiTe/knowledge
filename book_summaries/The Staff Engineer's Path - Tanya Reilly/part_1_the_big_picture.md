@@ -2,6 +2,8 @@
 
 ## Chapter 1: What Would You Say You Do Here?
 
+big picture view on what staff engineers are and why organizations need them
+
 career ladders
 
 - idea of dual track, to distinguish between classical management path and technical leadership
@@ -149,5 +151,108 @@ aligning on scope, shape and primary focus
 - remember that your job is to make the organization successful
 
 ## Chapter 2: Three Maps
+
+- analogously to real life maps, use different dedicated maps and not overlay everything into one (elevation, voting districts, streets)
+- below maps already exist, maybe implicitly, and need to be uncovered
+- maps will change over time as company priorities shift, and need to be uncovered again
+- learn over time, what mails and meetings are important to inform your context
+- note down relevant information
+
+locator map
+
+- perspective: what happens outside and at the boundary of your scope
+- what is a team's purpose, who are its customers, how does the work affect other people
+- dangers of being too absorbed in any domain
+  - prioritizing badly (local vs global maxima)
+  - losing empathy (when communicating, experts overestimate average person's familiarity with their topic)
+  - tuning out the background noise (not recognizing gradual change that slides into a catastrophe)
+  - forgetting what the work is for
+- to combat this, try to take the view of an outsider
+  - escape the echo chamber
+    - seek out peers, build relationships so you can speak the truth to one another
+    - get feedback, challenge pre-existing notions, remain objective
+    - go beyond engineering (product, customer support, admin staff, ...)
+  - what is actually important
+    - technology only means to an end
+    - don't pay off technical debt while you are lacking core features that would keep customers on board
+  - what do customers care about
+    - measure success from their pov (also applies to internal customers)
+    - e.g. if a website is unreachable, it does not matter if SLOs on the DNS service are upheld
+  - have your problems been solved before?
+    - goal is solving problems, not necessarily writing code to do so
+    - understand what already exists before building something new (conferences, newsletters, ...)
+
+topographical map
+
+- navigating paths inside the organization
+- how are decisions made, how do leaders prefer to work, uncovering shadow organization charts
+- friction and gaps between teams, open up paths of communication
+- challenges when not knowing the terrain
+  - your good ideas don't get traction (convince other people you are right, how to spread the idea)
+  - don't find out about the difficult parts until you get there (what was tried before and failed, what is a better path?)
+  - everything takes longer (your ideas in relation to organization's planning cycles)
+- understand your organization
+  - culture (degree of autonomy or inclusion, safe to make mistakes, ...)
+    - secret vs open wrt information sharing
+    - oral vs written (red tape process vs learning news randomly in the hallway, ideally somewhere in the middle)
+    - top-down vs bottom-up (where to get support for initiatives)
+    - fast vs deliberate
+    - back channels vs front doors (approach someone over coffee or file a ticket)
+    - allocated vs available
+    - liquid vs crystallized (fixed hierarchy or meritocracy)
+  - information flow, as classified by the Westrum organizational model
+  
+      | Pathological | Bureaucratic | Generative |
+      | -- | -- | -- |
+      | Power-oriented | Rule-oriented | Performance-oriented |
+      | Low Cooperation |  Modes cooperation | High cooperation |
+      | Messengers shot | Messengers neglected | Messengers trained |
+      | Responsibilities shirked | Narrow responsibilities | Risks shared |
+      | Bridging discouraged | Bridging tolerated | Bridging encouraged |
+      | Failure -> scapegoating | Failure -> justice | Failure -> inquiry |
+      | Novelty crushed | Novelty -> problems | Novelty implemented |
+
+    - as evidenced by DORA, generative organizations have higher software delivery performance
+    - possible actions to get there: cooperative cross-functional teams, blameless postmortems, break down silos, calculated risks, encourage experimentation
+  - points of interest
+    - chasms (teams' responsibilities rarely line up perfectly, e.g. gaps between product-focused and security )
+    - fortresses (gatekeepers, might require sponsorship to pass through, filled out questionnaires, addressing budget estimates or risk mitigation plans)
+    - disputed territory (power struggles and complicated decision making due to lack of alignment or overlapping responsibilities)
+    - uncrossable deserts (project too big or politically messy, need lots of evidence if picking this fight)
+    - paved roads, shortcuts, long ways around (official way to do things should be the most efficient, but isn't always in practice)
+- points of interest on the map
+  - need to understand how decisions are made to anticipate or influence them
+  - where are decisions made and who takes part (weekly management meeting, director's staff meeting, slack channel of a central architecture group, ...)
+  - when asking to be included, have a compelling story how this affects the organization positively, and then be prepared
+  - shadow org chart: who is an influencer without being formally a decision maker (connectors or old-timers)
+- keep map up to date by e.g.
+  - announcement lists or channels
+  - 'walk the floor', i.e. keep doing hands-on work to keep context and technical credibility
+  - lurking, e.g. get information that isn't secret but not necessary like meetings notes, list of channels etc.
+  - make time for reading (RFC, design documents, ...)
+  - check in with your leadership for behind-the-scenes updates confirm alignment
+  - talk with people to build context and build relationships (just ask a question and be interested ...)
+- build bridges (bring people together, write email summaries or documents, ...)
+
+treasure map
+
+- where are we going? destinations and points to get there
+- alignment on what and why
+- problems that can arise when not looking beyond short-term goals
+  - harder to keep everyone going in the same direction
+  - not finishing big things (can also lead to others not seeing the value of your projects)
+  - accumulating cruft (not knowing the bigger goal can lead to overcomplicated flexible solutions or becoming a weird edge case)
+  - competing initiatives (everyone trying to do the right thing but inadvertently creating chaos)
+  - engineers stop growing
+- how knowing the long term goal helps
+  - no need to keep tight alignment along the way, people can figure out their own route
+  - explains the 'why' (e.g. technology x helps to reduce time to market)
+  - knowing the goal helps to evaluate if proposed work will get us there
+  - share with others, so they have a definition of success and know what they are aiming for
+- if there is disagreement on the map
+  - see if confusion or misalignment can be lifted
+  - if this is not possible, create a new map
+
+with these maps you can build a narrative and even small task become part of a story
 
 ## Chapter 3: Creating the Big Picture
