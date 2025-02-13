@@ -93,4 +93,117 @@ look ahead
 
 ## Good Influence at Scale
 
+good influence
+
+- better engineers -> better software -> better business outcomes
+- when you work with someone who is missing skills or has lower standards, take your time to level them up
+- ripple effect across the company and time
+- shapes that influence can take
+
+  | | Individual | Group | Catalyst |
+  | -- | -- | -- | -- |
+  | Advice | Mentoring, sharing knowledge, feedback | Tech talks, documentation, articles | mentorship program, tech talk events |
+  | Teaching | Code review, design review, coaching/pairing/shadowing | Classes, codelabs | onboarding curriculum, teaching people to teach |
+  | Guardrails | Code review, change review, design review | processes, linters, style guides | Frameworks, culture change |
+  | Opportunity | Delegating, sponsorship, cheerleading, ongoing support | Sharing the spotlight, empowering your team | creating a culture of opportunity, see your junior colleagues change the world |
+
+advice
+
+- if unsolicited, needs to be helpful and non-obvious, can ask for permission or alternatively turn it into a blog post
+- individual
+  - mentorship: very individual (what works for someone else), figure out the actual need, set expectations (goals, meeting schedule)
+  - answering questions: be accessible, find out what is implicitly solicited without infodumping, be clear if you share info or ask for a change (code reviews)
+  - feedback: be honest in a kind way, don't hide the truth
+  - peer reviews: aks yourself what a person could do to jump to the next senior level, be aware of formal context
+- group
+  - write things down, documentation means that you don't have to explain a topic again and again
+  - if you want to reach outside the company, consider a blog post or article
+  - look for opportunities to get a microphone and audience (all-hands meeting, conference)
+- catalyst
+  - set up advice flows that don't need you to be involved
+  - have an easy-to-use documentation platform rather than relying on 1:1 conversation
+  - set up monthly tech talk meetings or mentorship programs (beware of the administrative work)
+
+teaching
+
+- difference to advice: receive information vs internalizing information
+- individual
+  - unlocking a topic: have a specific goal, include hands-on learning
+  - pairing: you execute, they shadow -> pairing -> they execute, you shadow
+  - code/design review: suggest better alternatives and encourage behavior
+    - understand the context (new to language vs 4-eyes check, initial draft vs before launch)
+    - explain why (e.g. why prefer unique_ptr over shared_ptr)
+    - give examples what would be better
+    - be clear (e.g. is something just a nitpick or safety critical like SQL injection, what is blocking)
+    - remain respectful, critique the code not the person
+  - coaching:
+    - teach people to solve problems themselves
+    - open questions
+    - active listening
+    - leave enough space for coachee to reflect
+- group
+  - classes, high-upfront cost which amortizes over time, specific goals, exercises
+  - codelabs, asynchronous, step-by-step tutorial, solving exercises
+  - create learning paths (e.g. day 1 send two pull requests to add name to team list, add favorite joke, have back-and-forth in PR, day 2 build and run pre-made tiny client + server in prod including log, UI, metrics, make tiny change to logging)
+- catalyst
+  - teach others to teach classes
+  - add class to onboarding curriculum (if applicable to every engineer)
+  - evangelize learning paths
+  - set up framework that makes it easy to create codelabs
+
+guardrails
+
+- stop someone to go over the edge and encourage autonomy, exploration and innovation
+- individual
+  - code, design, change review: neither rubber-stamp nor gate-keep, look for
+    - should this work exist (technical solution instead of talking to someone)
+    - does it actually solve the problem (can users use it, performance issues)
+    - handling failure (edge cases, malformed input, load spikes)
+    - is it understandable (can be maintained or debugged, naming)
+    - does it fit into the bigger picture (patterns, risky change scheduled at unsuitable time)
+    - do the right people know about it (names attached to action points?)
+  - project guardrails: warn of pitfalls, be specific (promise review of design, or advocate for ideas with management)
+- group
+  - processes
+    - standard steps
+      - e.g. for prelaunch: security approval needed, giving notice, feature flags, monitoring, documentation
+      - other examples: outage/incident response, agreeing on RFCs
+    - trade-off standardization vs thinking, the bigger the company the higher the chance some structure is needed
+    - needs to be lightweight (or will be sneaked around)
+    - make the right way the easy way
+  - written decisions
+    - make a decision and write it down to not have repeated arguments and decision fatigue
+    - style guides
+    - paved roads (recommend set of standard, well-supported technologies)
+    - policies (use sparingly, difficult to account for all edge cases)
+    - technical vision and strategy
+  - robots and reminders
+    - automated reminders
+    - linters (enforce style guide by machine, not reviewer)
+    - templates (e.g. for RFC, include security section)
+    - config checkers and pre-commit hooks
+- catalyst
+  - culture change, really difficult, so
+    - solve a real problem (be able to answer why)
+    - choose your battles
+    - offer support (make it easy to do the right thing)
+    - find allies (high level sponsors, influences, consider the shadow org chart)
+
+opportunities
+
+- people learn by doing, find them experiences they need to grow
+- individual
+  - delegation
+    - really hand over, not micromanage
+    - target the difficulty (bit of a stretch but manageable with support)
+    - redirect questions, not proxy information
+  - sponsorship
+    - advocate for someone else: promote their work, recommend them for opportunities, bring them into a network, stand up for them
+    - look for people that want opportunities to grow and that you trust
+  - connecting people
+- group
+  - share the stage, let other people do the work if it is good enough
+- catalyst
+  - empower your colleagues to go to senior and staff level
+
 ## What's Next?
