@@ -1,6 +1,6 @@
 # Leveling Up
 
-## You're a Role Model Now (Sorry)
+## Chapter 7: You're a Role Model Now (Sorry)
 
 meaning of doing a good job
 
@@ -91,7 +91,7 @@ look ahead
 
 'the metric for success is whether other people want to work with you'
 
-## Good Influence at Scale
+## Chapter 8: Good Influence at Scale
 
 good influence
 
@@ -206,4 +206,90 @@ opportunities
 - catalyst
   - empower your colleagues to go to senior and staff level
 
-## What's Next?
+## Chapter 9: What's Next?
+
+your career
+
+- what is important to you
+  - introspect, common examples
+    - being financially secure
+    - supporting your family
+    - having a flexible schedule
+    - learning a lot
+    - being visible
+    - doing cool things
+    - challenge yourself
+    - building wealth
+    - working for yourself
+    - making a difference
+    - enabling your vocation
+    - and many more: traveling, health, friends, ...
+- where are you going
+  - relate above priorities to a 'trail map' with milestones along the way
+  - find non-obvious path by not drawing entirely from your own experience, expand perspective (read, conferences, asking people)
+- what do you need to invest in
+  - building skills
+    - what do you want or need to be good at?
+    - is it worth the time investment?
+    - fast-paced industry requires life-long learning and energy management
+    - nobody knows everything -- no reason to suffer from imposter syndrome
+  - building a network
+    - be known
+      - get opportunities that are not published but decided in back-channel conversation (job offers, conference spots, project lead)
+    - know people
+      - get insights (what does competent and professional look to people in other roles, communication patterns), learn from experts
+    - networking is particular difficult for introverts, practical tips: <https://www.scienceofpeople.com/networking/>, <https://leaddev.com/career-development/engineering-leadership-little-help-my-friends>
+  - building visibility
+    - let people see you are solving problems, ask insightful questions, have a strategy in situations of chaos
+    - optional, but helpful: external contributions (open source, working groups, podcasts, conference talks, ...)
+  - choosing roles and projects deliberately
+    - what will give you the experience you want to have (big vs small company, management vs hands-on, learning opportunities)
+
+your current role
+
+- metrics
+  - measure if you grow towards your goals over time, detect trends or stagnation
+
+  | Signals | are you learning? growing? | learning transferable skills vs coping with your org's dysfunction? | feel about recruiting friends to company? | confidence level? | is the job physically good for you? |
+  | -- | -- | -- | -- | -- | -- |
+  | Scale | 0=stagnant, 5=rocketship growth | 0=coping in this org, 5=learning transferable skills | 0=morally conflicted, 5=wildly enthusiastic | 0=being eroded, 5=growing | 0=stress, stress, stress, 5=feeling healthy |
+  | \<date\> | | | | | |
+  | ... | | | | | |
+
+- can you get what you want from your role
+  - evaluate what is good in your role vs what could be improved in relation to your goals
+- should you change jobs
+  - reasons to stay
+    - feedback loops (see consequences of your actions)
+    - depth
+    - relationships
+    - context (takes time to build, different in every place)
+    - familiarity
+  - reasons to move
+    - employability (learn transferable skills, keep domain fresh)
+    - experiences
+    - growth (easier to get next level compared to promotions)
+    - money
+    - mismatch (not all roles are available in all places)
+
+paths from here
+
+- keep doing what you are doing (beware industry changes making your skills obsolete)
+- work toward promotion (for the right reason: cash, prestige, challenges, scope, respect, influence, ...)
+- work less (be deliberate which hours you drop and align expectations)
+- change teams (fresh start without rebuilding context and relationships)
+- build a new specialty
+- explore (e.g. rotation program)
+- take a management role (change of profession, not promotion, can swing back and forth)
+- take on reports for the first time (and be ready to do less technical work)
+- find or invent your own niche (find/define a role that fits your skills)
+- do the same job for a different employer
+- change employers and go up a level (e.g. bigger company or work you enjoy more)
+- change employers and go down a level
+- set up your own startup
+- go independent (profits from network and public presence)
+- change careers
+
+be prepared to reset and start anew (maps, context, relationships)
+
+take software seriously and help build a good software industry and impact lives positively
